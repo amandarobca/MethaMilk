@@ -41,7 +41,7 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
                             suavizado = 7,
                             truncar_neg_auc = FALSE) {
 
-  # --- localizar la visita ---
+  
   fecha <- as.character(fecha)
   ini_fmt <- format(base$inicio_visita, "%Y-%m-%d %H:%M:%S")
   cand <- which(base$id_vaca == id_vaca & startsWith(ini_fmt, fecha))
@@ -68,7 +68,7 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
   inicio_visita <- base$inicio_visita[fila]
   fin_analisis  <- base$fin_analisis[fila]
 
-  # --- descartar segundos solapados (coherente con unir_bases) ---
+
   ini_num <- floor(as.numeric(base$inicio_visita) + delay_seg)
   fin_num <- floor(as.numeric(base$fin_analisis) + delay_seg)
   seg_vis <- mapply(function(a, b) seq.int(a, b), ini_num, fin_num,
@@ -78,7 +78,7 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
   sniffer_seg <- floor(as.numeric(data_sniffer$FechaHora))
   sniffer <- data_sniffer[!(sniffer_seg %in% solapados), ]
 
-  # --- recuperar la serie de la visita ---
+ 
   ini_busq <- inicio_visita + delay_seg
   fin_busq <- fin_analisis + delay_seg
   sv <- sniffer[sniffer$FechaHora >= ini_busq & sniffer$FechaHora <= fin_busq, ]
@@ -87,7 +87,7 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
     stop("No hay medidas de sniffer en la ventana de esta visita.")
   }
 
-  # --- background, senal corregida y eje temporal ---
+  
   ch4_validos <- sv$CH4[!is.na(sv$CH4)]
   background <- NA_real_
   if (length(ch4_validos) > 0) {
@@ -99,7 +99,7 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
   sv$segundo  <- as.numeric(difftime(sv$FechaHora, min(sv$FechaHora),
                                      units = "secs"))
 
-  # --- suavizado de la senal cruda (para el grafico) ---
+  
   suaviza <- function(x) {
     if (suavizado <= 1) return(x)
     s <- as.numeric(stats::filter(x, rep(1 / suavizado, suavizado), sides = 2))
@@ -108,14 +108,14 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
   }
   sv$ch4_suave <- suaviza(sv$CH4)
 
-  # --- numero de picos (sobre la senal corregida y suavizada) ---
+ 
   suave_corr <- suaviza(sv$ch4_corr)
   picos <- if (nrow(sv) < 5) NULL else
     pracma::findpeaks(suave_corr, minpeakheight = min_altura,
                       minpeakdistance = min_distancia)
   n_picos <- if (is.null(picos)) 0L else nrow(picos)
 
-  # --- AUC (regla del trapecio sobre CH4 corregido) ---
+  
   s <- sv$segundo; cc <- sv$ch4_corr
   ok <- !is.na(s) & !is.na(cc); s <- s[ok]; cc <- cc[ok]
   auc <- if (length(s) < 2) NA_real_ else {
@@ -144,7 +144,7 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
     picos_por_minuto = n_picos / (tiempo_efectivo / 60)
   )
 
-  # --- impresion legible ---
+  
   cat(sprintf("Vaca %s  |  inicio %s\n", id_vaca, desc$inicio_visita))
   cat(sprintf("Medidas: %d   Duracion efectiva: %.0f s\n",
               desc$n_medidas, desc$tiempo_efectivo))
@@ -165,7 +165,7 @@ analisis_visita <- function(base, data_sniffer, id_vaca, fecha,
 
   if (!isTRUE(grafico)) return(invisible(desc))
 
-  # --- grafico (CH4 crudo, sin marcar picos) ---
+ 
   g <- ggplot2::ggplot(sv, ggplot2::aes(x = .data$segundo, y = .data$CH4))
   if (mostrar_auc) {
     g <- g + ggplot2::geom_ribbon(
