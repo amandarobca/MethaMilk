@@ -59,7 +59,7 @@ limpiar_sala <- function(archivo,
     fileEncoding = fileEncoding
   )
 
-  # Detectar el formato segun el numero de columnas y renombrar
+  
   n_col <- ncol(data_sala)
   if (n_col == 8) {
     names(data_sala) <- c("Evento", "id_vaca", "id_robot", "FechaHora",
@@ -77,12 +77,12 @@ limpiar_sala <- function(archivo,
          "Revisa el separador indicado en 'sep'.")
   }
 
-  # Limpiar espacios sobrantes en la columna de evento, si existe
+  
   if (tiene_evento) {
     data_sala$Evento <- trimws(data_sala$Evento)
   }
 
-  # --- NUEVO: deduplicacion opcional quedandose con las ENTRADA ---
+  
   n_antes <- nrow(data_sala)
   if (solo_entradas) {
     if (tiene_evento) {
@@ -95,20 +95,20 @@ limpiar_sala <- function(archivo,
     }
   }
 
-  # Conversion de tipos
+  
   data_sala$id_vaca   <- as.integer(data_sala$id_vaca)
   data_sala$id_robot  <- as.integer(data_sala$id_robot)
   data_sala$Produccion <- as.numeric(data_sala$Produccion)
   data_sala$FechaHora <- as.POSIXct(data_sala$FechaHora,
                                     format = formato_fecha)
 
-  # Aviso si la conversion de fecha ha fallado por completo
+  
   if (all(is.na(data_sala$FechaHora))) {
     warning("Todas las fechas resultaron NA: revisa 'formato_fecha' (",
             formato_fecha, ").")
   }
 
-  # Ordenar cronologicamente
+  
   data_sala <- data_sala[order(data_sala$FechaHora), ]
   rownames(data_sala) <- NULL
 
