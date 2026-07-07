@@ -51,6 +51,7 @@ analisis_rebano <- function(base,
 
   if (grafico == "ninguno") return(invisible(resumen))
 
+  
   if (grafico == "histograma") {
     g <- ggplot2::ggplot(base, ggplot2::aes(x = .data[[variable]])) +
       ggplot2::geom_histogram(bins = bins, fill = "steelblue", color = "white") +
