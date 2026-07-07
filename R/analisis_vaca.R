@@ -61,6 +61,7 @@ analisis_vaca <- function(base, id_vaca,
               format(rango[1], "%Y-%m-%d"), format(rango[2], "%Y-%m-%d")))
   print(format(resumen, digits = 4))
 
+  
   if (grafico == "ninguno") return(invisible(resumen))
 
   if (grafico == "evolucion") {
