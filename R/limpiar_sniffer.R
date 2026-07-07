@@ -50,22 +50,22 @@ limpiar_sniffer <- function(archivo,
          "Revisa el separador indicado en 'sep'.")
   }
 
-  # Conservar y renombrar las tres primeras columnas
+  
   data_sniffer <- data_sniffer[, 1:3]
   names(data_sniffer) <- c("FechaHora", "CH4", "CO2")
 
-  # Conversion de tipos
+  
   data_sniffer$FechaHora <- as.POSIXct(data_sniffer$FechaHora,
                                        format = formato_fecha)
   data_sniffer$CH4 <- as.numeric(data_sniffer$CH4)
   data_sniffer$CO2 <- as.numeric(data_sniffer$CO2)
 
-  # Cociente CH4/CO2 instantaneo (NA si CO2 no es positivo)
+  
   data_sniffer$ratio_CH4_CO2 <- ifelse(data_sniffer$CO2 > 0,
                                        data_sniffer$CH4 / data_sniffer$CO2,
                                        NA)
 
-  # Ordenar cronologicamente
+  
   data_sniffer <- data_sniffer[order(data_sniffer$FechaHora), ]
   rownames(data_sniffer) <- NULL
 
