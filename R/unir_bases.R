@@ -53,7 +53,7 @@ unir_bases <- function(data_sala, data_sniffer,
                        truncar_neg_auc = FALSE,
                        verbose = FALSE) {
 
-  # --- Ayudante local: "mm:ss" o "hh:mm:ss" -> segundos ---
+  
   tiempo_a_segundos <- function(x) {
     partes <- strsplit(as.character(x), ":")
     vapply(partes, function(p) {
@@ -64,7 +64,7 @@ unir_bases <- function(data_sala, data_sniffer,
     }, numeric(1))
   }
 
-  # --- Ayudante local: nº de picos de una senal de CH4 corregido ---
+ 
   contar_picos <- function(ch4_corr) {
     if (length(ch4_corr) < 5) return(0L)
     if (suavizado > 1) {
@@ -81,7 +81,7 @@ unir_bases <- function(data_sala, data_sniffer,
     if (is.null(picos)) 0L else nrow(picos)
   }
 
-  # --- Ayudante local: area bajo la curva (regla del trapecio) ---
+  
   calcular_auc <- function(segundo, ch4_corr) {
     ok <- !is.na(segundo) & !is.na(ch4_corr)
     segundo <- segundo[ok]; ch4_corr <- ch4_corr[ok]
@@ -92,7 +92,7 @@ unir_bases <- function(data_sala, data_sniffer,
           (utils::head(ch4_corr, -1) + utils::tail(ch4_corr, -1)) / 2)
   }
 
-  # --- Ayudante local: todas las metricas de UNA visita ---
+  
   metricas_una_visita <- function(inicio_visita, fin_analisis, sniffer) {
     inicio_busqueda <- inicio_visita + delay_seg
     fin_busqueda    <- fin_analisis + delay_seg
@@ -113,7 +113,7 @@ unir_bases <- function(data_sala, data_sniffer,
     if (nrow(sv) == 0) return(salida)
     sv <- sv[order(sv$FechaHora), ]
 
-    # Nivel de fondo (mediana del 20% inferior de CH4)
+    
     ch4_validos <- sv$CH4[!is.na(sv$CH4)]
     background <- NA_real_
     if (length(ch4_validos) > 0) {
@@ -123,7 +123,7 @@ unir_bases <- function(data_sala, data_sniffer,
                                   na.rm = TRUE)
     }
 
-    # Senal corregida y eje temporal (segundos desde el inicio de la ventana)
+   
     ch4_corr <- sv$CH4 - background
     segundo  <- as.numeric(difftime(sv$FechaHora, min(sv$FechaHora),
                                     units = "secs"))
@@ -140,15 +140,15 @@ unir_bases <- function(data_sala, data_sniffer,
     salida
   }
 
-  # 1. Una fila por visita: filas ENTRADA si todavia existe la columna Evento
+  
   if ("Evento" %in% names(data_sala)) {
     data_sala <- data_sala[trimws(data_sala$Evento) == "ENTRADA", ]
   }
 
-  # 2. Duracion de la visita (segundos) a partir de Tiempo_cubiculo "mm:ss"
+  
   tiempo_seg <- tiempo_a_segundos(data_sala$Tiempo_cubiculo)
 
-  # 3. Tabla de visitas
+  
   data_visitas <- data.frame(
     id_vaca         = data_sala$id_vaca,
     id_robot        = data_sala$id_robot,
@@ -159,7 +159,7 @@ unir_bases <- function(data_sala, data_sniffer,
     stringsAsFactors = FALSE
   )
 
-  # 4. Filtrar por duracion, siempre en segundos
+  
   data_visitas$duracion_visita <- as.numeric(
     difftime(data_visitas$fin_visita, data_visitas$inicio_visita,
              units = "secs"))
@@ -169,7 +169,7 @@ unir_bases <- function(data_sala, data_sniffer,
     data_visitas$duracion_visita <= dur_max
   data_visitas <- data_visitas[mask, ]
 
-  # 5. Ventana efectiva de analisis (limitada a 'ventana_seg' segundos)
+  
   data_visitas$fin_analisis <- pmin(
     data_visitas$fin_visita,
     data_visitas$inicio_visita + ventana_seg)
@@ -177,7 +177,7 @@ unir_bases <- function(data_sala, data_sniffer,
     difftime(data_visitas$fin_analisis, data_visitas$inicio_visita,
              units = "secs"))
 
-  # 6. Segundos cubiertos por mas de una visita (con el retardo aplicado)
+  
   ini_num <- floor(as.numeric(data_visitas$inicio_visita) + delay_seg)
   fin_num <- floor(as.numeric(data_visitas$fin_analisis) + delay_seg)
   segundos_visita <- mapply(function(a, b) seq.int(a, b),
@@ -185,12 +185,12 @@ unir_bases <- function(data_sala, data_sniffer,
   conteo <- table(unlist(segundos_visita))
   segundos_solapados <- as.numeric(names(conteo)[conteo > 1])
 
-  # 7. Eliminar del sniffer las medidas en segundos solapados
+ 
   sniffer_seg <- floor(as.numeric(data_sniffer$FechaHora))
   data_sniffer_sin_solape <- data_sniffer[
     !(sniffer_seg %in% segundos_solapados), ]
 
-  # 8. Metricas por visita
+  
   resultados <- lapply(seq_len(nrow(data_visitas)), function(i) {
     metricas_una_visita(
       inicio_visita = data_visitas$inicio_visita[i],
@@ -200,7 +200,7 @@ unir_bases <- function(data_sala, data_sniffer,
   resultados_df <- do.call(rbind, resultados)
   data_final <- cbind(data_visitas, resultados_df)
 
-  # 9. Picos por minuto y seleccion final de columnas
+  
   data_final$picos_por_minuto <- data_final$n_picos /
     (data_final$tiempo_efectivo / 60)
 
