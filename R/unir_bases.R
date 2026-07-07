@@ -112,7 +112,6 @@ unir_bases <- function(data_sala, data_sniffer,
                     sniffer$FechaHora <= fin_busqueda, ]
     if (nrow(sv) == 0) return(salida)
     sv <- sv[order(sv$FechaHora), ]
-
     
     ch4_validos <- sv$CH4[!is.na(sv$CH4)]
     background <- NA_real_
