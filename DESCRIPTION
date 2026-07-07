@@ -1,0 +1,22 @@
+Package: MethaMilk
+Title: Integration and Analysis of Methane Emissions in Dairy Cattle from Automatic Milking Systems
+Version: 0.0.0.9000
+Authors@R: 
+    person("Amanda", "Robledo", , "arobcab@upv.edu.es", role = c("aut", "cre"))
+Description: Tool for integrating and analysing enteric methane (CH4) and
+    carbon dioxide (CO2) emissions recorded by sniffer sensors paired with
+    automatic milking systems (AMS) in commercial dairy herds. The package
+    covers cleaning and synchronisation of raw sensor and milking data,
+    detection of eructation peaks in the CH4 signal, and computation of
+    per-visit emission summary variables, providing a reproducible pipeline
+    from raw records to interpretable emission phenotypes per cow and visit.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports: 
+    ggplot2,
+    pracma,
+    rlang,
+    stats,
+    utils
